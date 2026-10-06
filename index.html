@@ -28,9 +28,15 @@
             <label class="auth-label">אימייל
               <input id="authEmailInput" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
             </label>
-            <button id="sendMagicLinkBtn" class="primary large full">שלח לי קישור כניסה</button>
+            <button id="sendMagicLinkBtn" class="primary large full">שלח קוד כניסה</button>
+            <div id="otpBlock" class="otp-block hidden">
+              <label class="auth-label">קוד בן 6 ספרות
+                <input id="authOtpInput" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" />
+              </label>
+              <button id="verifyOtpBtn" class="secondary large full">אמת והיכנס</button>
+            </div>
             <p id="authStatus" class="auth-status muted"></p>
-            <p class="muted auth-note">אין צורך בסיסמה. הקישור שתישלח למייל יכניס אותך לחשבון או ייצור חשבון חדש.</p>
+            <p class="muted auth-note">אין צורך בסיסמה. נשלח אליך קוד חד-פעמי; הזן אותו כאן כדי להיכנס או ליצור חשבון חדש.</p>
           </div>
         </div>
       </section>
