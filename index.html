@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Pyramid" />
   <title>פירמידת הולנד</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
   <div class="app-shell">
@@ -52,30 +52,62 @@
       </section>
 
       <section id="screen-workout" class="screen">
-        <div class="workout-head">
-          <button id="exitWorkoutBtn" class="ghost">יציאה</button>
-          <div class="timer-wrap"><div class="muted">זמן אימון</div><div id="workoutTimer" class="big-timer">00:00</div></div>
-          <button id="pauseWorkoutBtn" class="ghost">השהה</button>
-        </div>
-        <div class="progress-line workout-progress"><div id="workoutProgressBar"></div></div>
-        <div id="workoutCounter" class="muted center">0 / 0</div>
+        <div class="workout-shell">
+          <div class="workout-head">
+            <button id="exitWorkoutBtn" class="ghost compact-btn">יציאה</button>
+            <div class="timer-wrap">
+              <div class="muted timer-label">זמן אימון</div>
+              <div id="workoutTimer" class="big-timer">00:00</div>
+            </div>
+            <button id="pauseWorkoutBtn" class="ghost compact-btn">השהה</button>
+          </div>
 
-        <div class="card current-card">
-          <div class="muted">עכשיו</div>
-          <h2 id="currentExerciseName"></h2>
-          <div class="rep-box"><span id="currentExerciseReps" class="reps"></span><span id="currentExerciseUnit" class="muted"></span></div>
-          <div id="currentExerciseVisual" class="exercise-visual"></div>
-          <ul id="currentExerciseInstructions" class="instructions"></ul>
+          <div class="workout-status">
+            <div class="progress-line workout-progress"><div id="workoutProgressBar"></div></div>
+            <div class="workout-meta">
+              <span id="workoutCounter">תחנה 1 מתוך 15</span>
+              <span id="workoutStage" class="badge">שלב 1</span>
+            </div>
+          </div>
+
+          <div class="card current-card">
+            <div class="current-top">
+              <span class="now-pill">עכשיו</span>
+              <span id="currentExerciseVisual" class="exercise-visual"></span>
+            </div>
+
+            <h2 id="currentExerciseName"></h2>
+
+            <div class="rep-box">
+              <span id="currentExerciseReps" class="reps"></span>
+              <span id="currentExerciseUnit" class="rep-unit"></span>
+            </div>
+
+            <div id="currentExerciseCue" class="exercise-cue"></div>
+
+            <button id="toggleInstructionsBtn" class="ghost small instructions-toggle" aria-expanded="false">
+              הצג הוראות
+            </button>
+            <ul id="currentExerciseInstructions" class="instructions hidden"></ul>
+
+            <div class="next-inline">
+              <span class="muted">הבא</span>
+              <strong id="nextExerciseText">—</strong>
+            </div>
+          </div>
         </div>
 
-        <div class="card next-card"><div class="muted">הבא</div><strong id="nextExerciseText">—</strong></div>
         <div class="workout-actions">
           <button id="restBtn" class="secondary">מנוחה 45 שנ׳</button>
           <button id="doneStepBtn" class="primary large">סיימתי</button>
         </div>
 
         <div id="restOverlay" class="rest-overlay hidden">
-          <div class="rest-content"><div class="muted">מנוחה</div><div id="restTimer" class="rest-timer">00:45</div><button id="skipRestBtn" class="ghost">דלג</button></div>
+          <div class="rest-content">
+            <div class="muted">מנוחה</div>
+            <div id="restTimer" class="rest-timer">00:45</div>
+            <button id="skipRestBtn" class="ghost">דלג</button>
+          </div>
         </div>
       </section>
 
@@ -125,6 +157,6 @@
       <button data-screen="coach" class="nav-btn">מאמן</button>
     </nav>
   </div>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>
