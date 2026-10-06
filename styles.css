@@ -164,3 +164,23 @@ body.workout-mode main{
   .current-top{min-height:32px}
   .exercise-visual{font-size:27px}
 }
+
+
+/* Auth + cloud sync */
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.sync-indicator{font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.sync-indicator.syncing{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.sync-indicator.offline,.sync-indicator.error{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.auth-wrap{min-height:calc(100dvh - 150px);display:grid;place-items:center;padding:22px 0}
+.auth-card{width:min(100%,520px);padding:24px}
+.auth-card h2{margin-bottom:8px}
+.auth-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:#eff6ff;color:#2563eb;font-size:26px;font-weight:900;margin-bottom:16px}
+.auth-label{margin:18px 0 10px;font-size:14px;font-weight:700;color:var(--ink)}
+.auth-label input{margin-top:7px;width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;background:white;color:var(--ink);font-size:16px;direction:ltr;text-align:left}
+.auth-status{min-height:21px;margin:10px 0 0;font-size:14px}
+.auth-note{font-size:12px;line-height:1.5;margin:14px 0 0}
+body.auth-mode .bottom-nav{display:none}
+body.auth-mode .app-shell{padding-bottom:0}
+.account-card strong{font-size:16px;word-break:break-all}
+#cloudStatus{margin-top:10px}
+#screen-workout.active{overflow-y:auto;-webkit-overflow-scrolling:touch}
