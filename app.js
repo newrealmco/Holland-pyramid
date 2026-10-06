@@ -39,7 +39,7 @@ const screens=["home","workout","finish","history","coach"];
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function fmtDuration(seconds){const m=Math.floor(seconds/60).toString().padStart(2,"0"),s=Math.floor(seconds%60).toString().padStart(2,"0");return `${m}:${s}`;}
 function currentLevel(){return state.program.levels[state.currentLevelIndex];}
-function showScreen(name){screens.forEach(s=>$(`screen-${s}`).classList.toggle("active",s===name));document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.screen===name));if(name==="home")renderHome();if(name==="history")renderHistory();}
+function showScreen(name){screens.forEach(s=>$(`screen-${s}`).classList.toggle("active",s===name));document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.screen===name));document.body.classList.toggle("workout-mode",name==="workout");if(name==="home")renderHome();if(name==="history")renderHistory();}
 function buildSteps(level){const steps=[];level.pattern.forEach(stage=>state.program.exercises.forEach(ex=>steps.push({stage,exerciseId:ex.id,name:ex.name,short:ex.short,reps:ex.multiplier*stage,unit:ex.unit,visual:ex.visual,instructions:ex.instructions})));return steps;}
 function levelHistory(){const lvl=currentLevel();return state.history.filter(x=>x.levelId===lvl.id);}
 function progressionStatus(){const lvl=currentLevel(),hist=levelHistory(),recent=hist.slice(0,lvl.minSessions),enough=hist.length>=lvl.minSessions,rated=recent.filter(x=>Number.isFinite(x.difficulty)),avg=rated.length?rated.reduce((a,b)=>a+b.difficulty,0)/rated.length:null,difficultyOk=avg!==null&&avg<=lvl.maxAvgDifficultyForSuggestion,atLast=state.currentLevelIndex>=state.program.levels.length-1;return {lvl,hist,enough,avg,difficultyOk,eligible:enough&&difficultyOk&&!atLast,atLast};}
@@ -60,7 +60,27 @@ function startWorkout(){
 }
 function updateWorkoutClock(){if(!workout||workout.pauseStarted)return;const now=performance.now();workout.elapsedSeconds=Math.max(0,Math.floor((now-workout.startedPerf-workout.pausedMs)/1000));$("workoutTimer").textContent=fmtDuration(workout.elapsedSeconds);}
 function togglePause(){if(!workout)return;if(!workout.pauseStarted){workout.pauseStarted=performance.now();$("pauseWorkoutBtn").textContent="המשך";}else{workout.pausedMs+=performance.now()-workout.pauseStarted;workout.pauseStarted=null;$("pauseWorkoutBtn").textContent="השהה";updateWorkoutClock();}}
-function renderWorkoutStep(){const step=workout.steps[workout.stepIndex];$("currentExerciseName").textContent=step.name;$("currentExerciseReps").textContent=step.reps;$("currentExerciseUnit").textContent=step.unit;$("currentExerciseVisual").textContent=step.visual;const ul=$("currentExerciseInstructions");ul.innerHTML="";step.instructions.forEach(t=>{const li=document.createElement("li");li.textContent=t;ul.appendChild(li);});const next=workout.steps[workout.stepIndex+1];$("nextExerciseText").textContent=next?`${next.name} · ${next.reps} ${next.unit}`:"סיום האימון";$("workoutCounter").textContent=`${workout.stepIndex+1} / ${workout.steps.length}`;$("workoutProgressBar").style.width=`${(workout.stepIndex/workout.steps.length)*100}%`;}
+function renderWorkoutStep(){
+  const step=workout.steps[workout.stepIndex];
+  $("currentExerciseName").textContent=step.name;
+  $("currentExerciseReps").textContent=step.reps;
+  $("currentExerciseUnit").textContent=step.unit;
+  $("currentExerciseVisual").textContent=step.visual;
+  $("currentExerciseCue").textContent=step.instructions?.[0] || "";
+
+  const ul=$("currentExerciseInstructions");
+  ul.innerHTML="";
+  step.instructions.forEach(t=>{const li=document.createElement("li");li.textContent=t;ul.appendChild(li);});
+  ul.classList.add("hidden");
+  $("toggleInstructionsBtn").textContent="הצג הוראות";
+  $("toggleInstructionsBtn").setAttribute("aria-expanded","false");
+
+  const next=workout.steps[workout.stepIndex+1];
+  $("nextExerciseText").textContent=next?next.name+" · "+next.reps+" "+next.unit:"סיום האימון";
+  $("workoutCounter").textContent="תחנה "+(workout.stepIndex+1)+" מתוך "+workout.steps.length;
+  $("workoutStage").textContent="שלב "+step.stage;
+  $("workoutProgressBar").style.width=((workout.stepIndex+1)/workout.steps.length*100)+"%";
+}
 function finishWorkoutFlow(){if(workoutInterval)clearInterval(workoutInterval);updateWorkoutClock();$("finishSummary").textContent=`${workout.levelName} · ${fmtDuration(workout.elapsedSeconds)} · ${workout.steps.length} תחנות`;showScreen("finish");}
 function completeStep(){if(!workout)return;if(workout.stepIndex>=workout.steps.length-1){$("workoutProgressBar").style.width="100%";finishWorkoutFlow();return;}workout.stepIndex+=1;renderWorkoutStep();}
 function startRest(){if(restInterval)clearInterval(restInterval);let remaining=45;$("restTimer").textContent=fmtDuration(remaining);$("restOverlay").classList.remove("hidden");restInterval=setInterval(()=>{remaining-=1;$("restTimer").textContent=fmtDuration(remaining);if(remaining<=0)stopRest();},1000);}
@@ -82,6 +102,6 @@ async function importProgram(){const f=$("programFileInput").files[0];if(!f){$("
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;$("installBtn").classList.remove("hidden");});
 $("installBtn").addEventListener("click",async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;$("installBtn").classList.add("hidden");});
 document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>showScreen(btn.dataset.screen)));
-$("startWorkoutBtn").addEventListener("click",startWorkout);$("pauseWorkoutBtn").addEventListener("click",togglePause);$("exitWorkoutBtn").addEventListener("click",abandonWorkout);$("doneStepBtn").addEventListener("click",completeStep);$("restBtn").addEventListener("click",startRest);$("skipRestBtn").addEventListener("click",stopRest);$("saveWorkoutBtn").addEventListener("click",saveFinishedWorkout);$("promoteBtn").addEventListener("click",promoteLevel);$("clearHistoryBtn").addEventListener("click",clearHistory);$("exportJsonBtn").addEventListener("click",exportJson);$("exportCsvBtn").addEventListener("click",exportCsv);$("importProgramBtn").addEventListener("click",importProgram);$("difficultyInput").addEventListener("input",e=>$("difficultyValue").textContent=`${e.target.value}/10`);
+$("startWorkoutBtn").addEventListener("click",startWorkout);$("pauseWorkoutBtn").addEventListener("click",togglePause);$("exitWorkoutBtn").addEventListener("click",abandonWorkout);$("doneStepBtn").addEventListener("click",completeStep);$("restBtn").addEventListener("click",startRest);$("skipRestBtn").addEventListener("click",stopRest);$("saveWorkoutBtn").addEventListener("click",saveFinishedWorkout);$("promoteBtn").addEventListener("click",promoteLevel);$("clearHistoryBtn").addEventListener("click",clearHistory);$("exportJsonBtn").addEventListener("click",exportJson);$("exportCsvBtn").addEventListener("click",exportCsv);$("importProgramBtn").addEventListener("click",importProgram);$("difficultyInput").addEventListener("input",e=>$("difficultyValue").textContent=`${e.target.value}/10`);$("toggleInstructionsBtn").addEventListener("click",()=>{const ul=$("currentExerciseInstructions"),open=ul.classList.contains("hidden");ul.classList.toggle("hidden",!open);$("toggleInstructionsBtn").textContent=open?"הסתר הוראות":"הצג הוראות";$("toggleInstructionsBtn").setAttribute("aria-expanded",open?"true":"false");});
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
 renderHome();
