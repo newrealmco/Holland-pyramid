@@ -184,3 +184,19 @@ body.auth-mode .app-shell{padding-bottom:0}
 .account-card strong{font-size:16px;word-break:break-all}
 #cloudStatus{margin-top:10px}
 #screen-workout.active{overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+
+/* iOS standalone safe-area fix */
+.topbar{
+  padding-top:calc(14px + env(safe-area-inset-top));
+  min-height:calc(64px + env(safe-area-inset-top));
+}
+body:not(.workout-mode) main{
+  padding-top:14px;
+}
+@supports (padding: max(0px)){
+  .topbar{
+    padding-left:max(18px, env(safe-area-inset-left));
+    padding-right:max(18px, env(safe-area-inset-right));
+  }
+}
