@@ -1,5 +1,5 @@
-const CACHE = "holland-pyramid-v4";
-const SHELL = ["./","./index.html","./styles.css?v=4","./app.js?v=4","./manifest.json"];
+const CACHE = "holland-pyramid-v5";
+const SHELL = ["./","./index.html","./styles.css?v=5","./app.js?v=5","./manifest.json"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
