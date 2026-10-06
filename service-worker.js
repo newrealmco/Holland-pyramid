@@ -1,5 +1,5 @@
-const CACHE = "holland-pyramid-v3";
-const SHELL = ["./","./index.html","./styles.css?v=3","./app.js?v=3","./manifest.json"];
+const CACHE = "holland-pyramid-v4";
+const SHELL = ["./","./index.html","./styles.css?v=4","./app.js?v=4","./manifest.json"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -16,7 +16,6 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if(event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
   if(url.origin !== self.location.origin) return;
 
