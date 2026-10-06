@@ -62,7 +62,7 @@ let workoutInterval=null;
 let restInterval=null;
 let deferredInstallPrompt=null;
 let cloudSyncInFlight=false;
-let lastEmailForOtp="";
+
 
 const $=id=>document.getElementById(id);
 const screens=["auth","home","workout","finish","history","coach"];
@@ -397,29 +397,40 @@ function resetToAuth(){
   showScreen("auth");
 }
 
-async function sendOtp(){
+async function signIn(){
   const email=$("authEmailInput").value.trim().toLowerCase();
-  if(!email){$("authStatus").textContent="הכנס כתובת אימייל.";return;}
-  lastEmailForOtp=email;
-  $("sendMagicLinkBtn").disabled=true;
-  $("authStatus").textContent="שולח קוד…";
-  const {error}=await supabaseClient.auth.signInWithOtp({email:email,options:{shouldCreateUser:true}});
-  $("sendMagicLinkBtn").disabled=false;
-  if(error){$("authStatus").textContent="לא הצלחתי לשלוח קוד: "+error.message;return;}
-  $("otpBlock").classList.remove("hidden");
-  $("authOtpInput").focus();
-  $("authStatus").textContent="שלחנו קוד למייל. הזן אותו כאן.";
-}
-async function verifyOtp(){
-  const email=(lastEmailForOtp||$("authEmailInput").value.trim().toLowerCase());
-  const token=$("authOtpInput").value.trim();
-  if(!email||token.length!==6){$("authStatus").textContent="הזן את הקוד בן 6 הספרות.";return;}
-  $("verifyOtpBtn").disabled=true;
-  $("authStatus").textContent="מאמת…";
-  const {data,error}=await supabaseClient.auth.verifyOtp({email:email,token:token,type:"email"});
-  $("verifyOtpBtn").disabled=false;
-  if(error){$("authStatus").textContent="הקוד לא תקין או שפג תוקפו.";return;}
+  const password=$("authPasswordInput").value;
+  if(!email||!password){$("authStatus").textContent="הכנס אימייל וסיסמה.";return;}
+  $("signInBtn").disabled=true;
+  $("authStatus").textContent="מתחבר…";
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  $("signInBtn").disabled=false;
+  if(error){
+    $("authStatus").textContent="הכניסה נכשלה. בדוק את האימייל והסיסמה, ואם נרשמת עכשיו ודא שאימתת את המייל.";
+    return;
+  }
   if(data&&data.user){$("authStatus").textContent="נכנסת בהצלחה.";await activateUser(data.user);}
+}
+async function signUp(){
+  const email=$("authEmailInput").value.trim().toLowerCase();
+  const password=$("authPasswordInput").value;
+  if(!email||!password){$("authStatus").textContent="הכנס אימייל וסיסמה.";return;}
+  if(password.length<6){$("authStatus").textContent="הסיסמה צריכה להכיל לפחות 6 תווים.";return;}
+  $("signUpBtn").disabled=true;
+  $("authStatus").textContent="יוצר חשבון…";
+  const {data,error}=await supabaseClient.auth.signUp({
+    email,
+    password,
+    options:{emailRedirectTo:"https://newrealmco.github.io/Holland-pyramid/"}
+  });
+  $("signUpBtn").disabled=false;
+  if(error){$("authStatus").textContent="לא הצלחתי ליצור חשבון: "+error.message;return;}
+  if(data&&data.session&&data.user){
+    $("authStatus").textContent="החשבון נוצר ונכנסת בהצלחה.";
+    await activateUser(data.user);
+  }else{
+    $("authStatus").textContent="החשבון נוצר. נשלח אליך מייל אימות. אשר אותו ואז חזור לכאן ולחץ התחבר.";
+  }
 }
 async function signOut(){
   setSyncStatus("מתנתק…","syncing");
@@ -464,10 +475,10 @@ $("exportJsonBtn").addEventListener("click",exportJson);
 $("exportCsvBtn").addEventListener("click",exportCsv);
 $("importProgramBtn").addEventListener("click",importProgram);
 $("signOutBtn").addEventListener("click",signOut);
-$("sendMagicLinkBtn").addEventListener("click",sendOtp);
-$("verifyOtpBtn").addEventListener("click",verifyOtp);
-$("authEmailInput").addEventListener("keydown",e=>{if(e.key==="Enter")void sendOtp();});
-$("authOtpInput").addEventListener("keydown",e=>{if(e.key==="Enter")void verifyOtp();});
+$("signInBtn").addEventListener("click",signIn);
+$("signUpBtn").addEventListener("click",signUp);
+$("authEmailInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("authPasswordInput").focus();});
+$("authPasswordInput").addEventListener("keydown",e=>{if(e.key==="Enter")void signIn();});
 $("difficultyInput").addEventListener("input",e=>$("difficultyValue").textContent=e.target.value+"/10");
 $("toggleInstructionsBtn").addEventListener("click",()=>{
   const ul=$("currentExerciseInstructions"),open=ul.classList.contains("hidden");
